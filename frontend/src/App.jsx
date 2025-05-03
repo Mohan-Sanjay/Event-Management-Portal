@@ -1,38 +1,18 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./components/Login";
-import OrganizerDashboard from "./components/OrganizerDashboard";
-import AdminDashboard from "./components/AdminDashboard";
-import ProtectedRoute from "./components/ProtectedRoute";
-import "./App.css";
+// File: src/App.jsx
+import { Routes, Route } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import OrganizerDashboard from './pages/OrganizerDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 
-
-export default function App() {
+function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-      <Route
-  path="/organizer"
-  element={
-    <ProtectedRoute role="organizer">
-      <OrganizerDashboard />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/admin"
-  element={
-    <ProtectedRoute role="admin">
-      <AdminDashboard />
-    </ProtectedRoute>
-  }
-/>
-<Route path="/register" element={<Register />} />
-
-        <Route path="/" element={<Login />} />
-        <Route path="/organizer" element={<OrganizerDashboard />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/organizer" element={<OrganizerDashboard />} />
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="*" element={<div>404 - Page Not Found</div>} />
+    </Routes>
   );
 }
+
+export default App;

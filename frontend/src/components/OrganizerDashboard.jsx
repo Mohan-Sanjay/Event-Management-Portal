@@ -1,64 +1,38 @@
-import { useEffect, useState } from "react";
-import api from "../api";
+import React, { useState } from 'react';
+import axios from 'axios';
 
-export default function OrganizerDashboard() {
-  const [title, setTitle] = useState("");
-  const [hall, setHall] = useState("homije_baba"); // default hall
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [requests, setRequests] = useState([]);
+export default function EventRequestForm() {
+  const [name, setName] = useState('');
+  const [date, setDate] = useState('');
+  const [seminarHall, setSeminarHall] = useState('homije_baba');
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    window.location.href = "/";
-  };
-
-
-
-  const fetchRequests = async () => {
-    const res = await api.get("/organizer/my-requests");
-    setRequests(res.data);
-  };
- 
-  const submitRequest = async () => {
+  const handleEventRequest = async (e) => {
+    e.preventDefault();
     try {
-      await api.post("/organizer/request", { title, hall, date, time });
-      alert("Request sent");
-      fetchRequests();
-    } catch (err) {
-      alert(err.response.data.message);
+      const token = localStorage.getItem('token');
+      await axios.post('http://localhost:5000/api/event/request', { name, date, seminarHall }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+    } catch (error) {
+      console.error('Error requesting event', error);
     }
   };
 
-  useEffect(() => {
-    fetchRequests();
-  }, []);
-
   return (
     <div>
-      <h2>Organizer Dashboard</h2>
-      <h3>Request New Event</h3>
-      <input placeholder="Event Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-      <select value={hall} onChange={(e) => setHall(e.target.value)}>
-        <option value="homije_baba">Homije Baba Hall</option>
-        <option value="mahatma_gandhi">Mahatma Gandhi Hall</option>
-        <option value="sir_cv_raman">Sir C.V. Raman Hall</option>
-      </select>
-      <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-      <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
-      <button onClick={submitRequest}>Submit</button>
-
-      <h3>My Requests</h3>
-      <ul>
-        {requests.map((r) => (
-          <li key={r._id}>
-            {r.title} ({r.hall}) on {r.date} at {r.time} — <b>{r.status}</b>
-          </li>
-        ))}
-      </ul>
-      <button onClick={logout}>Logout</button>
-
+      <h2>Request Event</h2>
+      <form onSubmit={handleEventRequest}>
+        <input type="text" placeholder="Event Name" value={name} onChange={(e) => setName(e.target.value)} />
+        <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} />
+        <select value={seminarHall} onChange={(e) => setSeminarHall(e.target.value)}>
+          <option value="homije_baba">Homije Baba Seminar Hall</option>
+          <option value="mahatma_ganthi">Mahatma Gandhi Seminar Hall</option>
+          <option value="sir_c_v_raman">Sir C.V Raman Seminar Hall</option>
+        </select>
+        <button type="submit">Request Event</button>
+      </form>
     </div>
   );
 }

@@ -1,30 +1,29 @@
 // src/pages/Login.js
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // useNavigate for redirecting
+import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../services/api';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate(); // useNavigate hook
+  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
+  const handleLogin = async () => {
     try {
-      const user = await loginUser({ email, password });
-      localStorage.setItem('token', user.token); // Store token in localStorage
-
-      // Redirect to appropriate dashboard based on user role
+      const res = await axios.post('/api/login', { email, password });
+      localStorage.setItem('token', res.data.token);
+  
+      const user = res.data.user;
       if (user.role === 'admin') {
-        navigate('/admin'); // Navigate to Admin Dashboard
+        navigate('/admin');
       } else if (user.role === 'organizer') {
-        navigate('/organizer'); // Navigate to Organizer Dashboard
+        navigate('/organizer');
       }
-    } catch (error) {
+    } catch (err) {
       alert('Login failed!');
     }
   };
+  
 
   return (
     <div className="login-container">

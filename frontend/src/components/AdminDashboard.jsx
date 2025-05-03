@@ -1,28 +1,32 @@
-import { useEffect, useState } from "react";
-import api from "../api";
+// src/components/AdminDashboard.jsx
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function AdminDashboard() {
   const [requests, setRequests] = useState([]);
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    window.location.href = "/";
-  };
-
+  const token = localStorage.getItem("token");
 
   const fetchRequests = async () => {
-    const res = await api.get("/admin/requests");
-    setRequests(res.data);
+    try {
+      const res = await axios.get("http://localhost:5000/api/events/requests", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setRequests(res.data);
+    } catch (err) {
+      console.error("Error fetching requests:", err);
+    }
   };
 
-  const handleDecision = async (id, decision) => {
+  const handleDecision = async (id, status) => {
     try {
-      await api.post("/admin/decision", { eventId: id, decision });
-      alert(`Event ${decision}`);
-      fetchRequests();
+      await axios.put(
+        `http://localhost:5000/api/events/${id}`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchRequests(); // Refresh
     } catch (err) {
-      alert(err.response.data.message);
+      alert("Failed to update status");
     }
   };
 
@@ -33,18 +37,20 @@ export default function AdminDashboard() {
   return (
     <div>
       <h2>Admin Dashboard</h2>
-      <h3>Pending Requests</h3>
+      <h3>Pending Event Requests</h3>
       <ul>
         {requests.map((r) => (
           <li key={r._id}>
-            <b>{r.title}</b> on {r.date} at {r.time} by {r.organizer?.username || "unknown"}
-            <button onClick={() => handleDecision(r._id, "approved")}>Approve</button>
-            <button onClick={() => handleDecision(r._id, "rejected")}>Reject</button>
+            {r.title} | {r.date} | {r.organizer.name} | Hall: {r.hall} | Status: {r.status}
+            {r.status === "pending" && (
+              <>
+                <button onClick={() => handleDecision(r._id, "approved")}>Approve</button>
+                <button onClick={() => handleDecision(r._id, "rejected")}>Reject</button>
+              </>
+            )}
           </li>
         ))}
       </ul>
-      <button onClick={logout}>Logout</button>
-
     </div>
   );
 }
